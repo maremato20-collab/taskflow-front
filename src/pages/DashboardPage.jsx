@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import { TaskForm } from '@/components/tasks/TaskForm';
 import { TaskItem } from '@/components/tasks/TaskItem';
 import { TaskSkeleton } from '@/components/tasks/TaskSkeleton';
@@ -6,7 +7,6 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useAuth } from '@/hooks/useAuth';
 import { useTasks } from '@/hooks/useTasks';
-import type { Task } from '@/services/task.service';
 import {
   AlertCircle,
   CheckCircle2,
@@ -18,11 +18,10 @@ import {
   Plus,
   RefreshCw,
 } from 'lucide-react';
-import { useState } from 'react';
 
 export default function DashboardPage() {
   const { user, logout } = useAuth();
-  const {
+ const {
     tasks,
     isLoading,
     error,
@@ -31,14 +30,12 @@ export default function DashboardPage() {
     toggleTask,
     editTask,
     removeTask,
-  } = useTasks();
+  } = useTasks('a6b88fda-9ae3-4d74-9e82-94524950bce7');
 
-  // Estado para controlar la apertura del modal de creación
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
-  // Estado para la tarea que se está editando (null cuando no hay edición activa)
-  const [taskToEdit, setTaskToEdit] = useState<Task | null>(null);
+  
+  const [taskToEdit, setTaskToEdit] = useState(null);
 
-  // Métricas calculadas en tiempo de render
   const totalTasks = tasks.length;
   const completedTasks = tasks.filter((t) => t.completed).length;
   const pendingTasks = totalTasks - completedTasks;
@@ -94,7 +91,7 @@ export default function DashboardPage() {
             </p>
           </div>
 
-          {/* Grupo de botones de acción principal (más grandes y espaciados) */}
+          {/* Grupo de botones de acción principal */}
           <div className="flex items-center gap-3">
             <Button
               variant="outline"
@@ -187,8 +184,6 @@ export default function DashboardPage() {
         </div>
 
         {/* Sección de Estados de Interfaz */}
-
-        {/* 1. Estado de Carga: Grilla con 6 Skeletons pulsantes */}
         {isLoading && (
           <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
             {Array.from({ length: 6 }).map((_, index) => (
@@ -197,7 +192,6 @@ export default function DashboardPage() {
           </div>
         )}
 
-        {/* 2. Estado de Error */}
         {!isLoading && error && (
           <div className="flex flex-col items-center justify-center rounded-xl border border-rose-900/50 bg-rose-950/20 p-8 text-center">
             <AlertCircle className="h-10 w-10 text-rose-500" />
@@ -216,7 +210,6 @@ export default function DashboardPage() {
           </div>
         )}
 
-        {/* 3. Estado Vacío (Empty State) */}
         {!isLoading && !error && tasks.length === 0 && (
           <div className="flex flex-col items-center justify-center rounded-xl border border-dashed border-slate-800 bg-slate-900/30 py-16 text-center">
             <div className="rounded-full bg-slate-800/80 p-4 text-slate-400">
@@ -239,7 +232,6 @@ export default function DashboardPage() {
           </div>
         )}
 
-        {/* 4. Lista de Tareas */}
         {!isLoading && !error && tasks.length > 0 && (
           <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
             {tasks.map((task) => (
@@ -254,14 +246,12 @@ export default function DashboardPage() {
           </div>
         )}
 
-        {/* Modal de Creación de Tareas */}
         <TaskForm
           open={isCreateModalOpen}
           onOpenChange={setIsCreateModalOpen}
           onSubmit={addTask}
         />
 
-        {/* Modal de Edición de Tareas */}
         <TaskForm
           open={Boolean(taskToEdit)}
           onOpenChange={(isOpen) => {

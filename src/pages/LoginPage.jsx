@@ -1,6 +1,8 @@
-import { useState, type ChangeEvent, type SubmitEvent } from 'react';
+import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { useAuth } from '@/hooks/useAuth';
+import { useAuth } from '../hooks/useAuth'; 
+import { Mail, Lock, LogIn, AlertCircle, Loader2 } from 'lucide-react';
+
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import {
@@ -11,24 +13,21 @@ import {
   CardHeader,
   CardTitle,
 } from '@/components/ui/card';
-import { Mail, Lock, LogIn, AlertCircle, Loader2 } from 'lucide-react';
 
-function LoginPage() {
+export default function LoginPage() {
   const navigate = useNavigate();
-  const { login } = useAuth();
 
-  // Estado para los campos del formulario
+  const { login } = useAuth(); 
+
   const [formData, setFormData] = useState({
     email: '',
     password: '',
   });
 
-  // Estado para errores y feedback de carga
-  const [error, setError] = useState<string | null>(null);
+  const [error, setError] = useState(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  // Manejador dinámico de cambios en los inputs
-  const handleChange = (e: ChangeEvent<HTMLInputElement>) => {
+  const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData((prev) => ({
       ...prev,
@@ -37,26 +36,22 @@ function LoginPage() {
     if (error) setError(null);
   };
 
-  // Manejador del envío y autenticación real con la API
-  const handleSubmit = async (e: SubmitEvent<HTMLFormElement>) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     setError(null);
 
     const { email, password } = formData;
 
-    // 1. Validar campos obligatorios
     if (!email.trim() || !password) {
       setError('Por favor ingresa tu correo y contraseña.');
       return;
     }
 
-    // 2. Validar formato de correo
     if (!email.includes('@') || !email.includes('.')) {
       setError('Por favor ingresa un correo electrónico válido.');
       return;
     }
 
-    // 3. Validar longitud mínima
     if (password.length < 6) {
       setError('La contraseña debe tener al menos 6 caracteres.');
       return;
@@ -64,15 +59,12 @@ function LoginPage() {
 
     try {
       setIsSubmitting(true);
-      // Petición real de inicio de sesión conectada a TaskFlow API
-      await login({ email, password });
-      // Redirección programática al Dashboard privado
+      
+      await login(email, password); 
+
       navigate('/dashboard');
     } catch (err) {
-      const msg =
-        err instanceof Error
-          ? err.message
-          : 'Credenciales inválidas o error de conexión con el servidor';
+      const msg = err.message || 'Credenciales inválidas o error de conexión con el servidor';
       setError(msg);
     } finally {
       setIsSubmitting(false);
@@ -94,10 +86,8 @@ function LoginPage() {
           </CardDescription>
         </CardHeader>
 
-        {/* noValidate suprime los tooltips nativos del navegador */}
         <form noValidate onSubmit={handleSubmit}>
           <CardContent className="space-y-4">
-            {/* Mensaje de Error Condicional */}
             {error && (
               <div className="animate-in fade-in flex items-center gap-2 rounded-lg border border-red-500/50 bg-red-950/40 p-3 text-xs text-red-300">
                 <AlertCircle className="h-4 w-4 shrink-0 text-red-400" />
@@ -105,7 +95,6 @@ function LoginPage() {
               </div>
             )}
 
-            {/* Campo: Correo Electrónico */}
             <div className="space-y-1.5">
               <label className="text-xs font-medium text-slate-300">
                 Correo Electrónico
@@ -124,7 +113,6 @@ function LoginPage() {
               </div>
             </div>
 
-            {/* Campo: Contraseña */}
             <div className="space-y-1.5">
               <label className="text-xs font-medium text-slate-300">
                 Contraseña
@@ -144,7 +132,6 @@ function LoginPage() {
             </div>
           </CardContent>
 
-          {/* Botón de envío con estado de carga */}
           <CardFooter className="mt-6 flex flex-col gap-4 pt-6">
             <Button
               type="submit"
@@ -176,5 +163,3 @@ function LoginPage() {
     </div>
   );
 }
-
-export default LoginPage;
